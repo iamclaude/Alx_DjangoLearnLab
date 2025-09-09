@@ -9,11 +9,17 @@ class Library(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Author(models.Model):
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name    
 
 class Book(models.Model):
     title = models.CharField(max_length=200)
-    author = models.CharField(max_length=200)
-    library = models.ForeignKey(Library, on_delete=models.CASCADE, related_name="books")
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="books")
+    publication_year = models.IntegerField()
 
     class Meta:
         permissions = [
