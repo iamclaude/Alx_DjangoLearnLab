@@ -6,6 +6,10 @@ from .views import LibraryDetailView
 from . import views
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('bookshelf.urls')),          # <-- include bookshelf URLs
+    path('', include('relationship_app.urls')),   # if you still use relationship_app
+   
     # function-based view
     path('books/', list_books, name='list_books'),
 
