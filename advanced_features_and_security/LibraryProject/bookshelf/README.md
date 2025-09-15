@@ -1,15 +1,16 @@
-# bookshelf app - Permissions and Groups
+# Permissions & Groups in advanced_features_and_security
 
-Custom permissions defined on Book model:
-- can_view   -> View books
-- can_create -> Create books
-- can_edit   -> Edit books
-- can_delete -> Delete books
-
-Views are protected using @permission_required decorators:
-- list_books -> bookshelf.can_view
-- create_book -> bookshelf.can_create
-- edit_book -> bookshelf.can_edit
-- delete_book -> bookshelf.can_delete
-
-Assign permissions to groups (Editors, Viewers, Admins) via Django admin.
+- CustomUser model extends `AbstractUser` with fields:
+  - `date_of_birth`
+  - `profile_photo`
+- CustomUserManager implements:
+  - `create_user`
+  - `create_superuser`
+- `AUTH_USER_MODEL` is set in `settings.py`
+- Book model has custom permissions:
+  - `can_create`
+  - `can_edit`
+  - `can_delete`
+  - `can_view`
+- Permissions are enforced in views with `@permission_required`.
+- Groups can be created in the Django Admin (`Viewers`, `Editors`, `Admins`) and assigned permissions accordingly.
