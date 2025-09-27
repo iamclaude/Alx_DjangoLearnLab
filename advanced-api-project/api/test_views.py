@@ -8,6 +8,7 @@ class BookAPITestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(username='tester', password='pass123')
+        self.client.login(username='tester', password='pass123') 
         self.author = Author.objects.create(name='Chinua Achebe')
         self.book = Book.objects.create(title='Things Fall Apart', publication_year=1958, author=self.author)
 
