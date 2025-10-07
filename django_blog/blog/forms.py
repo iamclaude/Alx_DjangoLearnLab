@@ -1,14 +1,16 @@
 # blog/forms.py
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from .models import Post
 
-class CustomUserCreationForm(UserCreationForm):
+class PostForm(forms.ModelForm):
     """
-    Extends UserCreationForm to include an email field.
+    ModelForm for Post creation & editing.
+    The 'author' is set in the view (not in the form).
     """
-    email = forms.EmailField(required=True)
-
     class Meta:
-        model = User
-        fields = ("username", "email", "password1", "password2")
+        model = Post
+        fields = ['title', 'content']  # author and published_date handled automatically
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 10}),
+        }

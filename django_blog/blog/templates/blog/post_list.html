@@ -1,0 +1,33 @@
+<!-- templates/blog/post_list.html -->
+{% extends "blog/base.html" %}
+{% block title %}All Posts{% endblock %}
+{% block content %}
+  <h1>Blog Posts</h1>
+  {% for post in posts %}
+    <article>
+      <h2><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h2>
+      <p>By {{ post.author.username }} on {{ post.published_date|date:"Y-m-d H:i" }}</p>
+      <p>{{ post.content|truncatechars:200 }}</p>
+      {% if user == post.author %}
+        <p>
+          <a href="{% url 'post-update' post.pk %}">Edit</a> |
+          <a href="{% url 'post-delete' post.pk %}">Delete</a>
+        </p>
+      {% endif %}
+    </article>
+  {% empty %}
+    <p>No posts yet.</p>
+  {% endfor %}
+
+  {% if is_paginated %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+      {% endif %}
+      <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Next</a>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}
