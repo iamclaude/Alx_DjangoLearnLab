@@ -105,6 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 import os
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
@@ -112,3 +113,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'blog/static')]
 
 # Templates
 TEMPLATES[0]['DIRS'] = [os.path.join(BASE_DIR, 'blog/templates')]
+
+
+LOGIN_REDIRECT_URL = "profile"
+LOGOUT_REDIRECT_URL = "login"
