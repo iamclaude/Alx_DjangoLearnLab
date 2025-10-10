@@ -10,6 +10,18 @@ from django.http import HttpResponseRedirect
 from .forms import RegistrationForm, ProfileForm, PostForm
 from .models import Post, Comment
 from .forms import CommentForm
+from django.db.models import Q
+
+def search_view(request):
+    query = request.GET.get('q', '')
+    results = []
+    if query:
+        results = Post.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+    return render(request, 'blog/search_results.html', {'query': query, 'results': results}) 
 
 # --- Existing register_view and profile_view here (unchanged) ---
 def register_view(request):
