@@ -20,6 +20,6 @@ urlpatterns = [
 
     # Comments (nested under posts)
     path("post/<int:post_pk>/comments/new/", views.CommentCreateView.as_view(), name="comment-create"),
-    path("post/comments/<int:pk>/edit/", views.CommentUpdateView.as_view(), name="comment-update"),
+    path("post/comments/<int:pk>/update/", views.CommentUpdateView.as_view(), name="comment-update"),
     path("post/comments/<int:pk>/delete/", views.CommentDeleteView.as_view(), name="comment-delete"),
 ]
