@@ -7,7 +7,6 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect
-
 from .forms import RegistrationForm, ProfileForm, PostForm
 from .models import Post, Comment
 from .forms import CommentForm
@@ -72,20 +71,39 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     form_class = PostForm
     template_name = "blog/post_form.html"
 
+    @transaction.atomic
     def form_valid(self, form):
-        # Set the author to the currently logged in user
+        # set author then save to get instance
         form.instance.author = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        # process tags from cleaned_data (list of tag names)
+        tag_names = form.cleaned_data.get("tags", [])
+        if tag_names:
+            tags = []
+            for name in tag_names:
+                tag_obj, _ = Tag.objects.get_or_create(name=name)
+                tags.append(tag_obj)
+            self.object.tags.set(tags)
+        return response
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = "blog/post_form.html"
 
+    @transaction.atomic
     def form_valid(self, form):
-        # Ensure author stays unchanged
+        # ensure author unchanged
         form.instance.author = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        tag_names = form.cleaned_data.get("tags", [])
+        if tag_names is not None:
+            tags = []
+            for name in tag_names:
+                tag_obj, _ = Tag.objects.get_or_create(name=name)
+                tags.append(tag_obj)
+            self.object.tags.set(tags)
+        return response
 
     def test_func(self):
         post = self.get_object()
@@ -145,3 +163,29 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def get_success_url(self):
         return reverse("post-detail", kwargs={"pk": self.object.post.pk})
 
+# Tag filtered list
+class TaggedPostListView(ListView):
+    model = Post
+    template_name = "blog/post_list.html"  # reuse list template
+    context_object_name = "posts"
+    paginate_by = 10
+
+    def get_queryset(self):
+        tag_name = self.kwargs.get("tag_name", "").lower()
+        return Post.objects.filter(tags__name=tag_name).order_by("-published_date")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["tag_filter"] = self.kwargs.get("tag_name", "")
+        return ctx
+
+# Search view (function-based for simplicity)
+def search_view(request):
+    q = request.GET.get("q", "").strip()
+    results = Post.objects.none()
+    if q:
+        # search in title, content, and tag names (case-insensitive)
+        results = Post.objects.filter(
+            Q(title__icontains=q) | Q(content__icontains=q) | Q(tags__name__icontains=q)
+        ).distinct().order_by("-published_date")
+    return render(request, "blog/search_results.html", {"query": q, "posts": results})

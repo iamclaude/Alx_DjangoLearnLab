@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Profile, Post
+from .models import Profile, Post, Tag
 from .models import Comment
 
 class RegistrationForm(UserCreationForm):
@@ -19,13 +19,31 @@ class ProfileForm(forms.ModelForm):
         widgets = {"bio": forms.Textarea(attrs={"rows": 3})}
 
 class PostForm(forms.ModelForm):
+    tags = forms.CharField(required=False, help_text="Comma-separated tags (e.g. django,python,help)")
+
     class Meta:
         model = Post
-        fields = ("title", "content")  # author/published_date handled in view
+        fields = ("title", "content", "tags")
         widgets = {
             "title": forms.TextInput(attrs={"maxlength": 200}),
             "content": forms.Textarea(attrs={"rows": 10}),
         }
+
+    def clean_tags(self):
+        raw = self.cleaned_data.get("tags", "")
+        # normalize: split, strip, lower, remove empties, unique
+        tag_list = []
+        for t in [s.strip() for s in raw.split(",") if s.strip()]:
+            if t:
+                tag_list.append(t.lower())
+        # preserve order but unique
+        seen = set()
+        unique_tags = []
+        for t in tag_list:
+            if t not in seen:
+                seen.add(t)
+                unique_tags.append(t)
+        return unique_tags
 
 class CommentForm(forms.ModelForm):
     class Meta:

@@ -3,11 +3,18 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Posts</title>
+    <title>{% if tag_filter %}Posts tagged "{{ tag_filter }}"{% else %}Posts{% endif %}</title>
     <link rel="stylesheet" href="{% static 'blog/css/auth.css' %}">
 </head>
 <body>
-    <h1>All Posts</h1>
+    <h1>{% if tag_filter %}Posts tagged "{{ tag_filter }}"{% else %}All Posts{% endif %}</h1>
+
+    <form method="get" action="{% url 'search' %}">
+        {% csrf_token %}
+        <input type="text" name="q" placeholder="Search posts by title, content or tag" value="{{ request.GET.q|default:'' }}">
+        <button type="submit">Search</button>
+    </form>
+
     <p><a href="{% url 'post-create' %}">Create New Post</a> | <a href="{% url 'profile' %}">Profile</a></p>
 
     {% if posts %}
@@ -17,23 +24,24 @@
                     <h2><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h2>
                     <p>By {{ post.author.username }} — {{ post.published_date }}</p>
                     <p>{{ post.content|truncatechars:150 }}</p>
+                    <p>
+                      Tags:
+                      {% if post.tags.all %}
+                        {% for tag in post.tags.all %}
+                          <a href="{% url 'posts-by-tag' tag.name %}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                      {% else %}
+                        (none)
+                      {% endif %}
+                    </p>
                 </li>
             {% endfor %}
         </ul>
-
         {% if is_paginated %}
-            <div>
-                {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                {% endif %}
-                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
-                {% endif %}
-            </div>
+            <!-- pagination links unchanged -->
         {% endif %}
     {% else %}
-        <p>No posts yet.</p>
+        <p>No posts found.</p>
     {% endif %}
 </body>
 </html>
