@@ -26,6 +26,7 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ("title", "content", "tags")
         widgets = {
+            "tags": TagWidget(),
             "title": forms.TextInput(attrs={"maxlength": 200}),
             "content": forms.Textarea(attrs={"rows": 10}),
         }
