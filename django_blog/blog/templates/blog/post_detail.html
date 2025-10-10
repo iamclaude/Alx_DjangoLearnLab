@@ -1,16 +1,25 @@
-<!-- templates/blog/post_detail.html -->
-{% extends "blog/base.html" %}
-{% block title %}{{ object.title }}{% endblock %}
-{% block content %}
-  <h1>{{ object.title }}</h1>
-  <p>By {{ object.author.username }} on {{ object.published_date|date:"Y-m-d H:i" }}</p>
-  <div>{{ object.content|linebreaks }}</div>
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ post.title }}</title>
+    <link rel="stylesheet" href="{% static 'blog/css/auth.css' %}">
+</head>
+<body>
+    <h1>{{ post.title }}</h1>
+    <p>By {{ post.author.username }} — {{ post.published_date }}</p>
+    <div>
+        {{ post.content|linebreaks }}
+    </div>
 
-  {% if user == object.author %}
-    <p>
-      <a href="{% url 'post-update' object.pk %}">Edit</a> |
-      <a href="{% url 'post-delete' object.pk %}">Delete</a>
-    </p>
-  {% endif %}
-  <p><a href="{% url 'post-list' %}">Back to posts</a></p>
-{% endblock %}
+    {% if user.is_authenticated and user == post.author %}
+        <p>
+            <a href="{% url 'post-update' post.pk %}">Edit</a> |
+            <a href="{% url 'post-delete' post.pk %}">Delete</a>
+        </p>
+    {% endif %}
+
+    <p><a href="{% url 'post-list' %}">Back to posts</a></p>
+</body>
+</html>
